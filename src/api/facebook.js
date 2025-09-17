@@ -1,17 +1,7 @@
 require("dotenv").config();
 const axios = require("axios");
 const qs = require("qs");
-const fs = require("fs");
-const path = require("path");
 const FormData = require("form-data");
-
-const {
-  PAGE_ID,
-  PERMANENT_PAGE_TOKEN,
-  APP_ID,
-  APP_SECRET,
-  SHORT_LIVED_USER_TOKEN,
-} = process.env;
 
 const FB_API = "https://graph.facebook.com/v21.0";
 
@@ -39,14 +29,11 @@ async function getPermanentPageToken(appId, appSecret, shortLivedUserToken) {
     });
 
     const page = accountsRes.data.data?.[0];
-    if (!page) {
-      console.log("No pages found for this user");
-      return null;
-    }
+    if (!page) return null;
 
     return page.access_token;
   } catch (err) {
-    console.log(
+    console.error(
       "Error in getPermanentPageToken:",
       err.response?.data || err.message
     );
@@ -62,12 +49,12 @@ async function postText(pageId, pageToken, message) {
     const res = await axios.post(url, body);
     return res.data;
   } catch (err) {
-    console.log("Error in postText:", err.response?.data || err.message);
+    console.error("Error in postText:", err.response?.data || err.message);
     return null;
   }
 }
 
-// === Пост с 1 картинкой ===
+// === Пост с картинкой ===
 async function postImage(pageId, pageToken, imageBuffer, message) {
   try {
     const form = new FormData();
@@ -92,7 +79,7 @@ async function postImage(pageId, pageToken, imageBuffer, message) {
 
     return postRes.data;
   } catch (err) {
-    console.log("Error in postImage:", err.response?.data || err.message);
+    console.error("Error in postImage:", err.response?.data || err.message);
     return null;
   }
 }
@@ -126,7 +113,7 @@ async function postMultipleImages(pageId, pageToken, imageBuffers, message) {
 
     return postRes.data;
   } catch (err) {
-    console.log(
+    console.error(
       "Error in postMultipleImages:",
       err.response?.data || err.message
     );
@@ -143,7 +130,7 @@ async function getPagePosts(pageId, pageToken, limit = 5) {
     });
     return res.data.data;
   } catch (err) {
-    console.log("Error in getPagePosts:", err.response?.data || err.message);
+    console.error("Error in getPagePosts:", err.response?.data || err.message);
     return [];
   }
 }
@@ -157,7 +144,10 @@ async function deletePagePost(postId, pageToken) {
     });
     return res.data;
   } catch (err) {
-    console.log("Error in deletePagePost:", err.response?.data || err.message);
+    console.error(
+      "Error in deletePagePost:",
+      err.response?.data || err.message
+    );
     return null;
   }
 }
@@ -175,7 +165,10 @@ async function getPostInsights(
     });
     return res.data.data;
   } catch (err) {
-    console.log("Error in getPostInsights:", err.response?.data || err.message);
+    console.error(
+      "Error in getPostInsights:",
+      err.response?.data || err.message
+    );
     return null;
   }
 }
@@ -188,7 +181,7 @@ async function commentOnPost(postId, pageToken, message) {
     const res = await axios.post(url, body);
     return res.data;
   } catch (err) {
-    console.log("Error in commentOnPost:", err.response?.data || err.message);
+    console.error("Error in commentOnPost:", err.response?.data || err.message);
     return null;
   }
 }
@@ -201,7 +194,10 @@ async function replyToComment(commentId, pageToken, message) {
     const res = await axios.post(url, body);
     return res.data;
   } catch (err) {
-    console.log("Error in replyToComment:", err.response?.data || err.message);
+    console.error(
+      "Error in replyToComment:",
+      err.response?.data || err.message
+    );
     return null;
   }
 }

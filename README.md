@@ -4,12 +4,31 @@
 [![Runs with Axios](https://img.shields.io/badge/HTTP-Axios-5A29E4.svg?style=flat-square&logo=axios&logoColor=white)](https://axios-http.com/)
 [![Runs with dotenv](https://img.shields.io/badge/Env-dotenv-000.svg?style=flat-square&logo=dotenv&logoColor=white)](https://www.npmjs.com/package/dotenv)
 [![Runs with Facebook Graph API](https://img.shields.io/badge/Facebook-Graph%20API-1877F2.svg?style=flat-square&logo=facebook&logoColor=white)](https://developers.facebook.com/docs/graph-api)
+[![Runs with form-data](https://img.shields.io/badge/Upload-form--data-EC4A3F.svg?style=flat-square)](https://www.npmjs.com/package/form-data)
+[![Runs with qs](https://img.shields.io/badge/Query-qs-000000.svg?style=flat-square)](https://www.npmjs.com/package/qs)
+![Facebook Automation](/assets/logo.webp)
 
 # Facebook Page Automation
 
-![Facebook Automation](/assets/facebook.jpg)
+This project provides a simple Node.js wrapper for the Facebook Graph API to manage Facebook Pages.  
+It supports posting text, images (single or multiple), fetching posts, deleting posts, commenting, replying, and retrieving insights.
 
-Simple Node.js application to manage and automate publishing on Facebook Pages using the **Facebook Graph API**.
+## Project Structure
+
+```
+.
+├── src/
+│   ├── api/                # Core API functions
+│   │   └── facebookPageApi.js
+│   ├── config/             # Configuration files
+│   │   └── index.js
+│   ├── utils/              # Helper functions
+│   └── index.js            # Example usage
+├── assets/                 # Test images, etc.
+├── .env                    # Environment variables
+├── package.json
+└── README.md
+```
 
 # Technologies Used
 
@@ -17,6 +36,85 @@ Simple Node.js application to manage and automate publishing on Facebook Pages u
 - **Axios**: HTTP client for API requests.
 - **dotenv**: To manage environment variables.
 - **Facebook Graph API**: For programmatic posting and page management.
+- **form-data**: To handle file uploads (e.g., posting images).
+- **qs**: Query string parsing and stringifying.
+
+## Environment Variables
+
+In your `.env` file, set the following values:
+
+```
+PAGE_ID=your_facebook_page_id
+PERMANENT_PAGE_TOKEN=your_page_token
+APP_ID=your_facebook_app_id
+APP_SECRET=your_facebook_app_secret
+SHORT_LIVED_USER_TOKEN=your_short_lived_user_token
+```
+
+## Getting a Permanent Page Token
+
+To be able to publish posts to a Facebook Page via the API, you need a **permanent Page Token**.  
+The process consists of several steps:
+
+### 0. Get a short-lived token
+
+Go to [Graph API Explorer](https://developers.facebook.com/tools/explorer/) and generate a `Short-Lived User Token` (valid for ~1 hour).
+
+---
+
+### 1. Exchange for a long-lived User Token
+
+```
+GET https://graph.facebook.com/v21.0/oauth/access_token
+  ?grant_type=fb_exchange_token
+  &client_id={APP_ID}
+  &client_secret={APP_SECRET}
+  &fb_exchange_token={SHORT_LIVED_USER_TOKEN}
+```
+
+Response will contain `LONG_LIVED_USER_TOKEN` (valid for up to 60 days).
+
+---
+
+### 2. Get User ID
+
+```
+GET https://graph.facebook.com/v21.0/me?access_token={LONG_LIVED_USER_TOKEN}
+```
+
+Example response:
+
+```json
+{
+  "name": "Name",
+  "id": "000000111"
+}
+```
+
+---
+
+### 3. Get Permanent Page Token
+
+```
+GET https://graph.facebook.com/v21.0/{USER_ID}/accounts?access_token={LONG_LIVED_USER_TOKEN}
+```
+
+The response will include the user’s pages and their `access_token`.  
+The token for the **Page** will be permanent (does not expire).
+
+---
+
+### 4. Verify the Token
+
+Go to [Access Token Debugger](https://developers.facebook.com/tools/debug/accesstoken) and paste your Page Token.  
+If everything is correct, the token will be shown as permanent and can be safely used in API requests.
+
+---
+
+⚠️ **Important:**
+
+- Always use the **Page Token** (not User Token) for posting, commenting, or fetching insights.
+- Store the permanent Page Token securely in `.env` (`PERMANENT_PAGE_TOKEN`).
 
 ## Facebook App Setup
 
